@@ -38,7 +38,7 @@ ff=/data/data/com.termux/files
 bin=start.sh
 echo "writing launch script"
 
-cat > $bin <<- EOM
+cat > $bin <<- EOF
 #!/bin/bash
 basedir=\$(dirname \$0)
 
@@ -78,7 +78,7 @@ if [ -z "\$com" ];then
 else
     eval "exec \$command login -c '\$com'"
 fi
-EOM
+EOF
 echo "fixing shebang of $bin"
 termux-fix-shebang $bin
 echo "making $bin executable"
