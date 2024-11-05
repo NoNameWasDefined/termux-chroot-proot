@@ -24,8 +24,8 @@ esac
 file="bootstrap-$arch.zip"
 url="https://github.com/$maint/termux-packages/releases/latest/download"
 
-cd=/data/data/com.termux/files/usr/var/cache/$maint
-mkdir -p $cd
+cd="/data/data/com.termux/files/usr/var/cache/$maint"
+mkdir -p "$cd"
 
 if [ ! -r $cd/$file ]; then
   echo "Downloading $file"
@@ -51,11 +51,14 @@ else
   echo "You phone is not rooted or you do not allowed Termux to run root shell so proot was selected"
   su=0
 fi
-  
-echo "Please enter a folder name for your installation"
-read name
 
-source $PREFIX/etc/tcw
+if [ $1 = "" ]; then
+  echo "Please enter a folder name for your installation"
+  read name
+else
+  name=$1
+
+source $PREFIX/etc/tcw.env
 
 if [ $RootFS = "" ]; then
   rfsd=$RootFS
@@ -63,24 +66,31 @@ fi
 rfsd=$(dirname $rfsd)
 mkdir -p $rfsd
 
-if [ -e $rfsd/$name]; then
-  echo "It's seems that you have already installed a distro"
+if [ -e $rfsd/$name ]; then
+  echo "It's seems that you have already installed a distro, run \"tcw -d $name\" to delete it"
+  exit 1
+fi
 mkdir $rfsd/$name
 if [ ! $? ]; then
   echo "Impossible to create directory \"$name\" in \"$rfsd\""
   exit 1
 fi
 
+cd $cd
+unzip $file
+
 exitc=256
 until [ $exitc -ne 256 ]; do
   if [ $su -eq 1 ]; then
-    $(dirname $0)/chroot.sh $cd $file $rfsd/$name
+    $(dirname $0)/chroot.sh "$cd/$file" $rfsd/$name
   else
+    
+    exit
     $(dirname $0)/proot.sh $cd/$file $rfsd $name
   fi
 
   if [ $? -eq 0 ]; then
-    echo "Enjoy your Termux chroot with \"tcm -s $name\""
+    echo "Enjoy your Termux chroot with \"tcw -s $name\""
     exitc=p
   else
     echo -n "Something went wrong in the chroot creation, do you want to retry ?"
